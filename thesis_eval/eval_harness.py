@@ -384,7 +384,7 @@ def main():
     parser.add_argument("--category", type=str, default=None,
                         help="Task category filter (A_navigation, B_atomic, C_composite, D_hard)")
     parser.add_argument("--policy", type=str, default="random",
-                        choices=["random", "scripted", "agent", "bc"],
+                        choices=["random", "scripted", "agent", "bc", "dp"],
                         help="Policy type")
     parser.add_argument("--split", type=str, default="pretrain",
                         choices=["pretrain", "target", "all"])
@@ -447,6 +447,25 @@ def main():
             _ckpt = candidates[-1] if candidates else _ckpt
         print(f"Loading BC checkpoint: {_ckpt}")
         policy = _bc_mod.BCPolicyWrapper(tasks[0], checkpoint_path=_ckpt)
+    elif args.policy == "dp":
+        import importlib.util, os as _os2
+        _dp_path = _os2.path.join(_os2.path.dirname(__file__), "dp_policy.py")
+        _spec = importlib.util.spec_from_file_location("dp_policy", _dp_path)
+        _dp_mod = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(_dp_mod)
+        _ckpt = _os2.path.join(
+            _os2.path.dirname(_os2.path.dirname(__file__)),
+            "results/checkpoints",
+            f"dp_{tasks[0]}_final.pt"
+        )
+        if not _os2.path.exists(_ckpt):
+            import glob
+            candidates = sorted(glob.glob(
+                _os2.path.join(_os2.path.dirname(_os2.path.dirname(__file__)),
+                              "results/checkpoints", f"dp_{tasks[0]}_*.pt")))
+            _ckpt = candidates[-1] if candidates else _ckpt
+        print(f"Loading DP checkpoint: {_ckpt}")
+        policy = _dp_mod.DPPolicyWrapper(tasks[0], checkpoint_path=_ckpt)
     else:
         raise ValueError(f"Unknown policy: {args.policy}")
 
