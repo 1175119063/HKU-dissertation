@@ -1,0 +1,22 @@
+# Large data / third-party
+robocasa/
+robosuite/
+datasets/
+results/checkpoints/
+*.img
+*.sh
+Miniconda*
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+server_setup.sh
+demo_gui.py
+env.sh
+pickplace.tar.gz
